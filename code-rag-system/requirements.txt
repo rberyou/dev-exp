@@ -1,0 +1,32 @@
+# Code RAG System Dependencies
+# 完全离线运行，适配RTX 3090
+
+# 代码解析
+tree-sitter==0.21.3
+tree-sitter-languages==1.10.2
+
+# 向量数据库
+chromadb==0.4.22
+
+# 兼容性修复：防止numpy升级到2.0版本
+numpy<2.0.0
+
+huggingface_hub==0.19.4
+
+# Embedding模型
+sentence-transformers==2.2.2
+transformers==4.35.2
+
+# LLM推理
+# vllm==0.2.7  # 或使用 llama-cpp-python，已注释以避免torch依赖冲突
+openai==1.6.1  # API兼容层
+requests==2.31.0  # 用于Ollama API调用
+
+# 工具库
+tiktoken==0.5.2
+rich==13.7.0
+pyyaml==6.0.1
+networkx==3.2.1  # 代码关系图
+
+# 可选：更好的C++解析
+libclang==16.0.6

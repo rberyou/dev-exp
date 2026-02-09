@@ -1,0 +1,74 @@
+# Code RAG System Configuration
+# 针对本地离线环境优化
+
+# 项目设置
+project:
+  name: "my-cpp-project"
+  root_path: "/path/to/your/codebase"
+  file_extensions:
+    - ".cpp"
+    - ".h"
+    - ".hpp"
+    - ".c"
+    - ".cc"
+  exclude_patterns:
+    - "**/build/**"
+    - "**/third_party/**"
+    - "**/.git/**"
+    - "**/test/**"
+
+# 分块配置
+chunking:
+  strategy: "semantic"  # semantic | fixed | hybrid
+  max_tokens: 1024
+  overlap_tokens: 128
+  include_context: true  # 包含文件路径、imports等
+
+# Embedding配置
+embedding:
+  model_name: "BAAI/bge-large-zh-v1.5"  # 中文优化
+  # model_name: "microsoft/codebert-base"  # 代码专用
+  device: "cuda"
+  batch_size: 32
+  normalize: true
+
+# 向量数据库
+vector_db:
+  type: "chroma"
+  persist_directory: "./data/chroma_db"
+  collection_name: "code_chunks"
+
+# 检索配置
+retrieval:
+  top_k: 10
+  rerank: true
+  rerank_model: "BAAI/bge-reranker-base"
+  rerank_top_k: 5
+  
+  # 多路召回权重
+  hybrid_search:
+    enabled: true
+    semantic_weight: 0.7
+    keyword_weight: 0.3
+
+# LLM配置
+llm:
+  # vLLM本地部署
+  backend: "openai"  # 可选: openai, vllm, ollama
+  api_base: "http://localhost:8000/v1"  # vLLM或OpenAI兼容接口
+  # api_base: "http://localhost:11434"  # Ollama API地址
+  model_name: "Qwen/Qwen2.5-Coder-7B-Instruct"
+  # model_name: "qwen2.5-coder:14b-instruct-q8_0"  # Ollama模型名
+  max_tokens: 2048
+  temperature: 0.1
+  
+  # 上下文窗口管理
+  max_context_tokens: 6000
+  reserved_output_tokens: 1024
+
+# 代码图谱（可选增强）
+code_graph:
+  enabled: true
+  extract_calls: true
+  extract_inheritance: true
+  extract_includes: true
