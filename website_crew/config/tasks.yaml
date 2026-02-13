@@ -1,0 +1,107 @@
+analyze_requirements:
+  description: |
+    Analyze the following user requirements for a web application:
+    {requirements}
+    
+    Break down the requirements into:
+    1. Core features and functionality
+    2. UI/UX components needed
+    3. API endpoints required
+    4. Database models needed
+    5. Technical considerations
+    
+    Create a prioritized feature list with clear acceptance criteria.
+  agent: product_manager
+  expected_output: |
+    A detailed specification document containing:
+    - Feature list with priorities (P0, P1, P2)
+    - Component breakdown
+    - API endpoint specifications
+    - Database schema requirements
+    - Technical recommendations
+
+design_system:
+  description: |
+    Based on the product requirements, design the UI/UX system:
+    
+    1. Design the page structure and navigation
+    2. Define reusable components with Tailwind CSS
+    3. Create component hierarchy
+    4. Specify responsive breakpoints
+    5. Define color palette and typography
+    
+    Focus on Next.js App Router structure.
+  agent: ui_designer
+  context:
+    - analyze_requirements
+  expected_output: |
+    A design specification containing:
+    - Page structure and routes
+    - Component list with props
+    - Tailwind CSS class patterns
+    - Layout specifications
+    - Responsive design notes
+
+implement_frontend:
+  description: |
+    Implement the frontend based on the design specifications:
+    
+    1. Create Next.js App Router structure
+    2. Implement React components with TypeScript
+    3. Apply Tailwind CSS styling
+    4. Add client-side interactivity
+    5. Implement responsive design
+    
+    Follow Next.js 14+ best practices and use 'use client' directive appropriately.
+  agent: frontend_dev
+  context:
+    - design_system
+  expected_output: |
+    Complete frontend code including:
+    - page.tsx files for each route
+    - Reusable components
+    - Layout files
+    - Styling with Tailwind classes
+
+implement_backend:
+  description: |
+    Implement the backend based on the requirements:
+    
+    1. Create Next.js API routes (route.ts)
+    2. Define TypeScript types/interfaces
+    3. Implement business logic
+    4. Add error handling
+    5. Create mock data if needed
+    
+    Follow REST API best practices.
+  agent: backend_dev
+  context:
+    - analyze_requirements
+  expected_output: |
+    Complete backend code including:
+    - API route handlers
+    - TypeScript interfaces
+    - Business logic
+    - Error handling
+    - Mock data (if applicable)
+
+write_tests:
+  description: |
+    Write comprehensive tests for the implemented code:
+    
+    1. Unit tests for components
+    2. API route tests
+    3. Integration tests
+    4. Review code quality
+    
+    Use Jest and React Testing Library patterns.
+  agent: qa_engineer
+  context:
+    - implement_frontend
+    - implement_backend
+  expected_output: |
+    Test files including:
+    - Component test files
+    - API test files
+    - Test utilities
+    - Code review notes
