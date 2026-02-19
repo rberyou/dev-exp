@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ project.name }} - DevCrew</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        .header a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.2);
+            border-radius: 6px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .progress-overview {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #667eea;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+        .progress-bar {
+            height: 12px;
+            background: #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+        .btn-warning {
+            background: #ff9800;
+            color: white;
+        }
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .task-list {
+            list        }
+        .task-item {
+            display: flex;
+-style: none;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            gap: 1rem;
+        }
+        .task-item:last-child {
+            border-bottom: none;
+        }
+        .task-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        .task-icon.completed { background: #e8f5e9; }
+        .task-icon.in_progress { background: #e3f2fd; }
+        .task-icon.pending { background: #f5f5f5; }
+        .task-icon.failed { background: #ffebee; }
+        .task-info {
+            flex: 1;
+        }
+        .task-title {
+            font-weight: 500;
+            color: #333;
+        }
+        .task-desc {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        .task-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .status.completed { background: #e8f5e9; color: #2e7d32; }
+        .status.in_progress { background: #e3f2fd; color: #1976d2; }
+        .status.pending { background: #f5f5f5; color: #666; }
+        .status.failed { background: #ffebee; color: #c62828; }
+        .actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        .loading.active {
+            display: block;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>📊 {{ project.name }}</h1>
+            <a href="/">← 返回项目列表</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="progress-overview">
+            <div class="stat-card">
+                <div class="stat-value">{{ progress.tasks.percentage }}%</div>
+                <div class="stat-label">总体进度</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ progress.tasks.completed }}</div>
+                <div class="stat-label">已完成</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ progress.tasks.in_progress }}</div>
+                <div class="stat-label">进行中</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ progress.tasks.total }}</div>
+                <div class="stat-label">总任务数</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ progress.tasks.percentage }}%"></div>
+            </div>
+            <div class="actions">
+                {% if progress.status == 'in_progress' %}
+                    <button class="btn btn-warning" onclick="pauseProject()">⏸ 暂停</button>
+                {% elif progress.status == 'paused' %}
+                    <button class="btn btn-success" onclick="resumeProject()">▶ 继续</button>
+                {% else %}
+                    <button class="btn btn-primary" onclick="startProject()">🚀 开始开发</button>
+                {% endif %}
+                <button class="btn" onclick="runPhase('requirements')" {% if progress.tasks.completed > 0 %}disabled{% endif }>需求分析</button>
+                <button class="btn" onclick="runPhase('architecture')" {% if progress.tasks.completed < 1 %}disabled{% endif }>架构设计</button>
+                <button class="btn" onclick="runPhase('implementation')" {% if progress.tasks.completed < 2 %}disabled{% endif }>代码实现</button>
+                <button class="btn" onclick="runPhase('testing')" {% if progress.tasks.completed < 3 %}disabled{% endif }>测试验证</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📋 任务进度</h2>
+            <ul class="task-list">
+                {% for task in tasks %}
+                <li class="task-item">
+                    <div class="task-icon {{ task.status }}">
+                        {% if task.status == 'completed' %}✅
+                        {% elif task.status == 'in_progress' %}🔄
+                        {% elif task.status == 'failed' %}❌
+                        {% else %}⏳{% endif %}
+                    </div>
+                    <div class="task-info">
+                        <div class="task-title">{{ task.title }}</div>
+                        <div class="task-desc">{{ task.description }}</div>
+                    </div>
+                    <span class="task-status {{ task.status }}">{{ task.status }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>📝 项目信息</h2>
+            <p><strong>项目ID:</strong> {{ project.project_id }}</p>
+            <p><strong>状态:</strong> {{ project.status }}</p>
+            <p><strong>当前阶段:</strong> {{ project.current_phase }}</p>
+            <p><strong>创建时间:</strong> {{ project.created_at }}</p>
+            <p><strong>更新时间:</strong> {{ project.updated_at }}</p>
+            {% if project.completed_at %}
+            <p><strong>完成时间:</strong> {{ project.completed_at }}</p>
+            {% endif %}
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 1rem;">正在执行任务...</p>
+        </div>
+    </div>
+
+    <script>
+        function showLoading() {
+            document.getElementById('loading').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('active');
+        }
+
+        async function startProject() {
+            showLoading();
+            try {
+                const response = await fetch('/api/projects/{{ project.project_id }}/start', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('执行失败: ' + data.error);
+                }
+            } catch (error) {
+                alert('执行失败: ' + error);
+            }
+            hideLoading();
+        }
+
+        async function pauseProject() {
+            try {
+                const response = await fetch('/api/projects/{{ project.project_id }}/pause', {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    window.location.reload();
+                }
+            } catch (error) {
+                alert('暂停失败: ' + error);
+            }
+        }
+
+        async function resumeProject() {
+            showLoading();
+            try {
+                const response = await fetch('/api/projects/{{ project.project_id }}/resume', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('继续失败: ' + data.error);
+                }
+            } catch (error) {
+                alert('继续失败: ' + error);
+            }
+            hideLoading();
+        }
+
+        async function runPhase(phase) {
+            showLoading();
+            try {
+                const response = await fetch('/api/projects/{{ project.project_id }}/phase/' + phase, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('执行失败: ' + data.error);
+                }
+            } catch (error) {
+                alert('执行失败: ' + error);
+            }
+            hideLoading();
+        }
+    </script>
+</body>
+</html>

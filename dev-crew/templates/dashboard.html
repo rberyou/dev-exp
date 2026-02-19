@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevCrew - 多智能体开发团队</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        .project-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .project-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        .project-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        .project-card .status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .status.created { background: #e3f2fd; color: #1976d2; }
+        .status.planning { background: #fff3e0; color: #f57c00; }
+        .status.in_progress { background: #e8f5e9; color: #388e3c; }
+        .status.paused { background: #fce4ec; color: #c2185b; }
+        .status.completed { background: #e8f5e9; color: #2e7d32; }
+        .progress-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+        .progress-text {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 DevCrew - 多智能体开发团队</h1>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>项目列表</h2>
+                <button class="btn btn-primary" onclick="openModal()">+ 新建项目</button>
+            </div>
+        </div>
+
+        <div class="project-grid" id="projectGrid">
+            {% if projects %}
+                {% for project in projects %}
+                <div class="project-card" onclick="window.location.href='/project/{{ project.project_id }}'">
+                    <h3>{{ project.name }}</h3>
+                    <span class="status {{ project.status }}">{{ project.status }}</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ project.tasks.percentage }}%"></div>
+                    </div>
+                    <div class="progress-text">
+                        进度: {{ project.tasks.completed }}/{{ project.tasks.total }} 任务 ({{ project.tasks.percentage }}%)
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="grid-column: 1/-1; text-align: center; color: #999; padding: 2rem;">
+                    暂无项目，点击上方按钮创建新项目
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="modal" id="createModal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 1.5rem;">创建新项目</h2>
+            <form id="createForm">
+                <div class="form-group">
+                    <label>项目名称</label>
+                    <input type="text" name="name" required placeholder="输入项目名称">
+                </div>
+                <div class="form-group">
+                    <label>项目描述</label>
+                    <textarea name="description" placeholder="输入项目描述"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>需求描述</label>
+                    <textarea name="requirements" placeholder="详细描述项目需求" required></textarea>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" class="btn" onclick="closeModal()" style="background: #e0e0e0;">取消</button>
+                    <button type="submit" class="btn btn-primary">创建项目</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById('createModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('createModal').classList.remove('active');
+        }
+
+        document.getElementById('createForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                name: formData.get('name'),
+                description: formData.get('description'),
+                requirements: formData.get('requirements'),
+            };
+
+            try {
+                const response = await fetch('/api/projects', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
+                if (response.ok) {
+                    window.location.reload();
+                }
+            } catch (error) {
+                alert('创建失败: ' + error);
+            }
+        });
+    </script>
+</body>
+</html>
