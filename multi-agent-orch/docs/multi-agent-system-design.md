@@ -1,6 +1,6 @@
 # 多Agent协作项目开发系统设计
 
-> 版本：v1.1  
+> 版本：v1.2  
 > 日期：2026-03-08
 
 ---
@@ -17,7 +17,8 @@
 | **Developer** | 代码实现、功能开发 | API文档 + 架构文档 + UI设计 | 可运行代码 |
 | **QA Engineer** | 测试用例设计、质量把控 | PRD + API文档 + UI设计 | 测试用例文档 |
 | **Code Reviewer** | 代码评审、规范把控 | 开发者提交的代码 | Review意见 |
-| **Product Manager** | 项目管理、进度跟踪、任务协调 | 项目整体情况 | 任务看板状态、项目报告 |
+| **Product Manager** | 项目管理、进度跟踪、任务协调、确定项目路径 | 项目整体情况 | 任务看板状态、项目报告 |
+| **DevOps** | 环境配置、CI/CD、部署 | 技术选型 + 项目路径（PM指定） | 开发环境 + 测试环境 + 验收环境（三套隔离环境） |
 
 ### 1.2 测试执行分工
 
@@ -59,6 +60,16 @@
 └──────────────────┘    │  • 输出API文档                                  │
                         └──────────────────────────────────────────────┘
                                 │
+                                ▼
+                        ┌──────────────────────────────────────────────┐
+                        │  DevOps                                         │
+                        │  • 接收：技术选型 + 项目路径（PM指定）            │
+                        │  • 创建开发环境（Developer使用）                │
+                        │  • 创建测试环境（QA使用）                       │
+                        │  • 创建验收环境（用户使用）                     │
+                        │  • 配置CI/CD流水线                              │
+                        └──────────────────────────────────────────────┘
+                                │ 三套环境就绪
                                 ▼
                         ┌──────────────────────────────────────────────┐
                         │  Developer                                     │
@@ -152,17 +163,22 @@
 | UI设计 | PRD完成 | 必须有PRD后才能开始UI设计 |
 | 架构设计 | PRD完成 | 必须有PRD后才能开始技术架构 |
 | API文档 | 架构设计完成 | API基于架构定义 |
+| 环境配置 | 架构设计完成 + PM指定项目路径 | DevOps获取技术栈后创建三套环境 |
+| 开发环境 | 环境配置完成 | Developer开始开发 |
+| 测试环境 | 环境配置完成 | QA开始测试 |
+| 验收环境 | 环境配置完成 | 用户验收 |
+| CI/CD | 环境配置完成 | 自动构建/测试/部署 |
 | 测试用例 | PRD + UI设计 | 需要完整需求、设计、接口 |
-| 代码开发 | API文档 + UI设计完成 | 必须有明确API + UI设计才能写代码 |
+| 代码开发 | API文档 + UI设计完成 + 开发环境就绪 | 必须有明确API + UI设计才能写代码 |
 | 代码Review | 代码开发完成 | 必须有代码才能Review |
-| 功能测试 | 代码Review通过 + 单元/集成测试通过 | 必须通过Review才能测试 |
-| 项目验收 | 功能测试通过 + 用户确认 | 需要功能实现并通过测试 |
+| 功能测试 | 代码Review通过 + 单元/集成测试通过 + 测试环境就绪 | 必须通过Review才能测试 |
+| 项目验收 | 功能测试通过 + 用户确认 + 验收环境就绪 | 需要功能实现并通过测试 |
 
 ### 3.2 并行与串行规则
 
-- **可并行**：UI设计 ↔ 架构设计（独立进行）
+- **可并行**：UI设计 ↔ 架构设计 ↔ 环境配置（独立进行）
 - **可并行**：API文档 ↔ 测试用例设计（独立进行）
-- **串行**：PRD → 用户确认 → UI设计/架构设计 → API → 开发 → 功能测试 → 验收
+- **串行**：PRD → 用户确认 → UI设计/架构设计 → 环境配置 → API → 开发 → 功能测试 → 验收
 
 #### 并行协调机制
 
@@ -203,6 +219,11 @@
    - 生成进度报告
    - 识别风险并预警
 
+6. **项目环境规划（DevOps协作）**
+   - 确定项目开发路径（代码仓库位置）
+   - 确定文档存储位置
+   - 将项目路径传递给 DevOps 创建环境
+
 ### 4.2 不属于PM的职责
 
 - 不负责撰写PRD（Product Designer）
@@ -228,12 +249,13 @@
 
 | 上游产物 | 传递方式 | 下游接收者 |
 |----------|----------|------------|
+| 项目路径（PM指定） | workspace配置 + spawn传递 | DevOps |
 | PRD文档 | 写入workspace + spawn传递 | UI Designer, Program Architect, QA |
 | Figma设计 | 链接/文件路径 | Developer, QA |
-| 架构文档 | 写入workspace + spawn传递 | Developer |
+| 架构文档 | 写入workspace + spawn传递 | DevOps, Developer |
 | API文档 | 写入workspace + spawn传递 | Developer, QA |
 | 测试用例 | 写入workspace + spawn传递 | Developer |
-| 代码仓库 | Git共享/workspace目录 | QA, PM |
+| 代码仓库 | Git共享/workspace目录 | DevOps, QA, PM |
 
 #### 5.1.3 spawn使用规范
 
@@ -261,12 +283,14 @@ sessions_spawn({
 
 | 文档 | 创建者 | 接收者 |
 |------|--------|--------|
+| 项目路径配置 | PM | DevOps |
 | PRD | Product Designer | UI Designer, Program Architect, QA Engineer |
 | UI设计(Figma) | UI Designer | Developer, QA Engineer |
-| 架构文档 | Program Architect | Developer |
+| 架构文档 | Program Architect | DevOps, Developer |
 | API文档 | Program Architect | Developer, QA Engineer |
+| 环境配置 | DevOps | Developer, QA Engineer, PM |
 | 测试用例 | QA Engineer | Developer, PM |
-| 代码 | Developer | QA Engineer (验收) |
+| 代码 | Developer | DevOps, QA Engineer (验收) |
 
 ### 5.3 交接检查清单
 
@@ -279,15 +303,15 @@ sessions_spawn({
 
 ## 六、改进要点总结
 
-| 问题 | 解决方案 |
-|------|----------|
-| 缺少Developer | 新增Developer角色负责代码实现 |
-| subagent矛盾 | 改由独立Developer Agent完成开发 |
-| 缺少DevOps | 可选扩展，当前版本聚焦开发流程 |
-| 缺少代码Review | 新增Review环节，由Program Architect或独立Reviewer负责 |
-| 流程不清晰 | 定义完整协作流程和依赖关系 |
-| PM职责过重 | 明确PM只负责管理，不做具体产出 |
-| 缺少验收 | PM协调最终验收环节 |
+| 问题 | 解决方案 | 状态 |
+|------|----------|------|
+| 缺少Developer | 新增Developer角色负责代码实现 | ✅ 已完成 |
+| subagent矛盾 | 改由独立Developer Agent完成开发 | ✅ 已完成 |
+| 缺少DevOps | 新增DevOps角色，负责环境配置/三套隔离环境/CI/CD | ✅ 已完成 |
+| 缺少代码Review | 新增Review环节，由Program Architect或独立Reviewer负责 | ✅ 已完成 |
+| 流程不清晰 | 定义完整协作流程和依赖关系 | ✅ 已完成 |
+| PM职责过重 | 明确PM只负责管理，不做具体产出 | ✅ 已完成 |
+| 缺少验收 | PM协调最终验收环节 | ✅ 已完成 |
 
 ---
 
@@ -298,8 +322,8 @@ sessions_spawn({
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | 任务名称 | 文本 | 具体任务描述 |
-| 角色 | 单选 | Product Designer / UI Designer / Program Architect / Developer / Code Reviewer / QA Engineer / PM |
-| 状态 | 单选 | 待处理 / 进行中 / 已完成 / 阻塞 / 已验收 |
+| 角色 | 单选 | Product Designer / UI Designer / Program Architect / Developer / Code Reviewer / QA Engineer / DevOps / PM |
+| 状态 | 单选 | 待处理 / 进行中 / 已完成 / 阻塞 / 环境就绪 / 已验收 |
 | 优先级 | 单选 | P0 / P1 / P2 |
 | 负责人 | 用户 | 分配的Agent或人 |
 | 依赖任务 | 关联 | 上游任务ID |
@@ -313,16 +337,38 @@ sessions_spawn({
 | 任务创建 | → 待处理 | PM |
 | 开始执行 | → 进行中 | 承担该角色的Agent |
 | 产出完成 | → 已完成 | Agent |
+| 环境配置完成 | → 环境就绪 | DevOps（特指环境配置任务） |
 | 遇到阻塞 | → 阻塞 | Agent（需说明原因） |
 | 问题解决 | → 进行中 | PM/Agent |
 | 用户确认 | → 已验收 | 用户 |
 
 ---
 
-## 八、后续扩展建议
+## 八、环境管理约束（DevOps核心原则）
 
-1. **DevOps Agent** — 可选添加，负责部署、CI/CD
-2. **Technical Lead** — 可选，用于技术方案评审
+> **关键约束**：任何与环境配置有关的事情都必须由 DevOps 负责，确保开发、测试、验收三套环境隔离运行。
+
+### 8.1 环境隔离原则
+
+| 环境 | 用途 | 隔离要求 |
+|------|------|----------|
+| **开发环境** | Developer 日常开发、单元测试 | 本地容器/虚拟环境，不污染全局 |
+| **测试环境** | QA 功能测试、集成测试 | 独立容器/独立服务器，与开发隔离 |
+| **验收环境** | 用户验收、与生产一致 | 独立环境，确保与生产一致 |
+
+### 8.2 环境管理规则
+
+- **局部环境**：使用容器（Docker）或虚拟环境隔离，不污染系统全局
+- **三套隔离环境**：开发/测试/验收环境完全隔离，互不影响
+- **环境即代码**：所有环境配置必须版本化管理（Dockerfile/ docker-compose.yml）
+- **PM 指定路径**：项目路径和文档存储位置由 PM 在创建工作流时确定，传递给 DevOps
+- **环境就绪**：环境配置完成后的状态为"环境就绪"，下游任务才能启动
+
+---
+
+## 九、后续扩展建议
+
+1. **Technical Lead** — 可选，用于技术方案评审
 3. **Agent通信协议** — 标准化Agent间消息格式
 4. **自动化流水线** — 代码提交自动触发单元测试 → Review → 集成测试
 5. **文档自动化** — 自动生成API文档、README、部署指南
