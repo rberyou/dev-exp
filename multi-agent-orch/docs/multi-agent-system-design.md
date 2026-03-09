@@ -286,13 +286,15 @@
 6. **项目环境规划（DevOps协作）**
    - 确定项目开发路径（代码仓库位置）
    - 确定文档存储位置
-   - 将项目路径传递给 DevOps 创建环境
+   - 将项目路径传递给 DevOps，由 DevOps 创建相应环境
 
 ### 4.2 不属于PM的职责
 
 - 不负责撰写PRD（Product Designer）
 - 不负责写代码（Developer）
 - 不负责测试（QA Engineer）
+
+> **说明**：PM在任务看板中的角色是"协调者"而非"执行者"，其任务类型仅限于项目管理类任务（如创建工作流、进度跟踪、协调阻塞问题等）。
 
 ---
 
@@ -314,7 +316,8 @@
 | 上游产物 | 传递方式 | 下游接收者 |
 |----------|----------|------------|
 | 项目路径（PM指定） | workspace配置 + spawn传递 | DevOps |
-| PRD文档 | 写入workspace + spawn传递 | UI Designer, Program Architect, QA |
+| PRD文档 | 写入workspace + spawn传递 | UI Designer, Program Architect |
+| PRD文档 + 架构文档 | 写入workspace + spawn传递 | QA Engineer（测试用例设计的必须输入） |
 | Figma设计 | 链接/文件路径 | Developer, QA |
 | 架构文档 | 写入workspace + spawn传递 | DevOps, Developer |
 | API文档 | 写入workspace + spawn传递 | Developer, QA |
